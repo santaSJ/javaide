@@ -15,19 +15,23 @@ import com.duy.compile.CompileManager;
 import com.duy.compile.external.CompileHelper;
 import com.duy.ide.R;
 import com.duy.ide.activities.AbstractAppCompatActivity;
+import com.duy.ide.editor.code.MainActivity;
 import com.duy.project.file.java.JavaProjectFolder;
 import com.duy.run.view.ConsoleEditText;
 
 import java.io.File;
 import java.io.InputStream;
 
+import static com.duy.compile.CompileManager.RESULT_DISTRIBUTED;
+
 /**
  * Created by Duy on 30-Jul-17.
  */
 
-public class ExecuteActivity extends AbstractAppCompatActivity {
+public class ExecuteActivity extends AbstractAppCompatActivity implements ConsoleEditText.StdOutListener {
     private static final int RUN_TIME_ERR = 1;
     private static final String TAG = "ExecuteActivity";
+    public static final String KEY_RESULT = "key_result";
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -136,5 +140,16 @@ public class ExecuteActivity extends AbstractAppCompatActivity {
 
     private void bindView() {
         mConsoleEditText = (ConsoleEditText) findViewById(R.id.console_view);
+        mConsoleEditText.init(this, this);
+
+    }
+
+    @Override
+    public void onResultGet(String result) {
+        Intent intent = new Intent();
+        intent.putExtra(KEY_RESULT, result);
+        setResult(RESULT_DISTRIBUTED, intent);
+        finish();
+
     }
 }

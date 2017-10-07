@@ -56,7 +56,7 @@ public class ProjectManager {
 
     @Nullable
     public static JavaProjectFolder createProjectIfNeed(Context context, File file) {
-        if (file.isFile() || !file.canWrite() || !file.canRead()) {
+        if (/*file.isFile() ||*/ !file.canWrite() || !file.canRead()) {
             return null;
         }
         // TODO: 05-Aug-17 dynamic change classpath

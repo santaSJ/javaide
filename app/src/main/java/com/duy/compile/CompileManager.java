@@ -44,6 +44,8 @@ public class CompileManager {
     public static final String ARGS = "program_args";
     public static final String DEX_FILE = "dex_path";
 
+    public static final int RESULT_DISTRIBUTED = 1010;
+
     private final Activity mActivity;
 
     public CompileManager(Activity activity) {
@@ -72,7 +74,7 @@ public class CompileManager {
         intent.putExtra(ACTION, CompileHelper.Action.RUN_DEX);
         intent.putExtra(PROJECT_FILE, projectFile);
         intent.putExtra(DEX_FILE, dex);
-        mActivity.startActivity(intent);
+        mActivity.startActivityForResult(intent, RESULT_DISTRIBUTED);
     }
 
     public void buildApk() {

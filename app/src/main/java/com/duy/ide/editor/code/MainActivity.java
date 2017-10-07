@@ -22,6 +22,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -62,6 +63,7 @@ import com.duy.ide.code_sample.activities.SampleActivity;
 import com.duy.ide.editor.code.view.EditorView;
 import com.duy.ide.editor.code.view.IndentEditText;
 import com.duy.ide.editor.uidesigner.inflate.DialogLayoutPreview;
+import com.duy.ide.file.FileManager;
 import com.duy.ide.setting.AppSetting;
 import com.duy.ide.themefont.activities.ThemeFontActivity;
 import com.duy.ide.utils.RootUtils;
@@ -80,6 +82,9 @@ import java.util.List;
 
 import javax.tools.Diagnostic;
 
+import static com.duy.compile.CompileManager.RESULT_DISTRIBUTED;
+import static com.duy.run.activities.ExecuteActivity.KEY_RESULT;
+
 public class MainActivity extends ProjectManagerActivity implements
         DrawerLayout.DrawerListener,
         DialogRunConfig.OnConfigChangeListener,
@@ -95,6 +100,8 @@ public class MainActivity extends ProjectManagerActivity implements
     private ProgressBar mCompileProgress;
     private AutoCompleteProvider mAutoCompleteProvider;
 
+    private static final String PACKAGE_NAME = "org.delta.distributed";
+
     private void populateAutoCompleteService(AutoCompleteProvider provider) {
         mPagePresenter.setAutoCompleteProvider(provider);
     }
@@ -104,9 +111,32 @@ public class MainActivity extends ProjectManagerActivity implements
         super.onCreate(savedInstanceState);
         mCompileManager = new CompileManager(this);
         mMenuEditor = new MenuEditor(this, this);
-        initView(savedInstanceState);
+//        initView(savedInstanceState);
+//
+//        startAutoCompleteService();
+//
+        String code = "package "+ PACKAGE_NAME +";\npublic class Main { public static void main(String[] args) {System.out.println(\"Hello World!!\");}}";
+//
+//        doCreateProject();
+        compileAndExecuteCode(code);
+    }
 
-        startAutoCompleteService();
+    private void doCreateProject() {
+        if (true) {
+            JavaProjectFolder projectFile = new JavaProjectFolder(
+                    new File(FileManager.EXTERNAL_DIR),
+                    PACKAGE_NAME + "." + "Main",
+                    PACKAGE_NAME, "DistributedAndroid",
+                    new File(getFilesDir(), "system/classes/android.jar").getPath());
+            try {
+                projectFile.createMainClass();
+                mProjectFile = projectFile;
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Can not create project. Error " + e.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     protected void startAutoCompleteService() {
@@ -300,6 +330,14 @@ public class MainActivity extends ProjectManagerActivity implements
         }
     }
 
+
+    public String compileAndExecuteCode(String sourceCode) {
+        doCreateProject();
+        String path = mProjectFile.getMainClass().getPath(mProjectFile);
+        FileManager.saveFile(path, sourceCode);
+        runProject();
+        return null;
+    }
 
     private void compileJavaProject() {
         //check main class exist
@@ -501,6 +539,7 @@ public class MainActivity extends ProjectManagerActivity implements
         }
     }
 
+
     @Override
     public void onSharedPreferenceChanged(@NonNull SharedPreferences sharedPreferences, @NonNull String s) {
         if (s.equals(getString(R.string.key_show_suggest_popup))
@@ -626,6 +665,11 @@ public class MainActivity extends ProjectManagerActivity implements
                         }, 100);
                     }
                 }
+                break;
+            case RESULT_DISTRIBUTED:
+                String result = data.getStringExtra(KEY_RESULT);
+                Toast.makeText(this, result, Toast.LENGTH_SHORT).show();
+                //todo another activity for result
                 break;
         }
     }

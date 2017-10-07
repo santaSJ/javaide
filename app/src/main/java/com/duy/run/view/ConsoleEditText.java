@@ -80,23 +80,25 @@ public class ConsoleEditText extends AppCompatEditText {
             }
         }
     };
+    private StdOutListener listener;
 
     public ConsoleEditText(Context context) {
         super(context);
-        init(context);
+//        init(context);
     }
 
     public ConsoleEditText(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context);
+//        init(context);
     }
 
     public ConsoleEditText(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(context);
+//        init(context);
     }
 
-    private void init(Context context) {
+    public void init(Context context, StdOutListener listener) {
+        this.listener = listener;
         if (!isInEditMode()) {
             AppSetting pref = new AppSetting(context);
             setTypeface(pref.getConsoleFont());
@@ -140,6 +142,9 @@ public class ConsoleEditText extends AppCompatEditText {
             String out = new String(mReceiveBuffer, 0, bytesRead);
             mLength = mLength + out.length();
             appendStdout(out);
+
+            listener.onResultGet(out);
+
         } catch (InterruptedException e) {
         }
     }
@@ -382,5 +387,11 @@ public class ConsoleEditText extends AppCompatEditText {
             // If the return value is same as the source values, return the source value.
             return returnStr;
         }
+
+
+    }
+
+    public interface StdOutListener {
+        void onResultGet(String result);
     }
 }

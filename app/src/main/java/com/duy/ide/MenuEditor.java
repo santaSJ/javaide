@@ -148,10 +148,10 @@ public class MenuEditor {
                 DonateUtils.showDialogDonate(activity);
                 break;
             case R.id.action_new_java_project:
-                activity.showDialogCreateJavaProject();
+//                activity.showDialogCreateJavaProject();
                 break;
             case R.id.action_new_android_project:
-                activity.showDialogCreateAndroidProject();
+//                activity.showDialogCreateAndroidProject();
                 break;
             case R.id.action_new_file:
                 if (listener != null) listener.createNewFile(null);
