@@ -101,6 +101,7 @@ public class MainActivity extends ProjectManagerActivity implements
     private AutoCompleteProvider mAutoCompleteProvider;
 
     private static final String PACKAGE_NAME = "org.delta.distributed";
+    private String code;
 
     private void populateAutoCompleteService(AutoCompleteProvider provider) {
         mPagePresenter.setAutoCompleteProvider(provider);
@@ -111,11 +112,14 @@ public class MainActivity extends ProjectManagerActivity implements
         super.onCreate(savedInstanceState);
         mCompileManager = new CompileManager(this);
         mMenuEditor = new MenuEditor(this, this);
+
+        Intent intent = getIntent();
+        code = intent.getStringExtra("code");
 //        initView(savedInstanceState);
 //
 //        startAutoCompleteService();
 //
-        String code = "package "+ PACKAGE_NAME +";\npublic class Main { public static void main(String[] args) {System.out.println(\"Hello World!!\");}}";
+//        String code = "package "+ PACKAGE_NAME +";\npublic class Main { public static void main(String[] args) {System.out.println(\"Hello World!!\");}}";
 //
 //        doCreateProject();
         compileAndExecuteCode(code);
@@ -669,7 +673,10 @@ public class MainActivity extends ProjectManagerActivity implements
             case RESULT_DISTRIBUTED:
                 String result = data.getStringExtra(KEY_RESULT);
                 Toast.makeText(this, result, Toast.LENGTH_SHORT).show();
-                //todo another activity for result
+                Intent i = new Intent();
+                i.putExtra("result", result);
+                setResult(1);
+                finish();
                 break;
         }
     }
