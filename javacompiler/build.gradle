@@ -10,6 +10,9 @@ android {
         versionCode 1
         versionName "1.0"
     }
+    task ndkBuild(type: Exec) {
+        commandLine 'ndk-build', '-C', file('src/main').absolutePath
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -18,6 +21,11 @@ android {
     }
 }
 
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+    }
+}
 
 dependencies {
     compile files('libs/bcpg-jdk15on-1.56.0.0.jar')

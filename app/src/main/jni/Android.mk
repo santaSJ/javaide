@@ -222,10 +222,10 @@ LOCAL_CFLAGS += $(aapt_CFLAGS)
 LOCAL_LDLIBS += -lz -llog
 
 # Building a commandline executable for Android
-# include $(BUILD_EXECUTABLE)
+include $(BUILD_EXECUTABLE)
 
 # Building a shared library for Android
-include $(BUILD_SHARED_LIBRARY)
+#include $(BUILD_SHARED_LIBRARY)
 
 ######################################################################################
 

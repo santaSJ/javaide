@@ -10,6 +10,9 @@ android {
         versionCode 1
         versionName "1.0"
     }
+    task ndkBuild(type: Exec) {
+        commandLine 'ndk-build', '-C', file('src/main').absolutePath
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -22,11 +25,18 @@ android {
     }
 }
 
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+    }
+}
+
 dependencies {
     compile "com.android.support:support-v4:$supportLibVersion"
     compile "com.android.support:appcompat-v7:$supportLibVersion"
     compile 'com.rengwuxian.materialedittext:library:2.0.3'
     compile 'com.google.code.gson:gson:2.7'
-    compile 'com.afollestad.material-dialogs:commons:0.9.4.6'
+    compile 'com.afollestad.material-dialogs:core:0.9.4.7'
+    compile 'com.afollestad.material-dialogs:commons:0.9.4.7'
 
 }

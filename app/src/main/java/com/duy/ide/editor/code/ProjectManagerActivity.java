@@ -582,7 +582,6 @@ public abstract class ProjectManagerActivity extends AbstractAppCompatActivity
 
     private void showDialogCreateNewFolder(File file) {
         if (mProjectFile != null && file != null) {
-            DialogHelper.showFilenameSuggestingDialog();
         }
     }
 

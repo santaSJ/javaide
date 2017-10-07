@@ -4061,17 +4061,17 @@ public class Arrays {
      * @see #toString(Object[])
      * @since 1.5
      */
-    public static String deepToString(Object[] a) {
-        if (a == null)
-            return "null";
-
-        int bufLen = 20 * a.length;
-        if (a.length != 0 && bufLen <= 0)
-            bufLen = Integer.MAX_VALUE;
-        StringBuilder buf = new StringBuilder(bufLen);
-        deepToString(a, buf, new HashSet());
-        return buf.toString();
-    }
+//    public static String deepToString(Object[] a) {
+//        if (a == null)
+//            return "null";
+//
+//        int bufLen = 20 * a.length;
+//        if (a.length != 0 && bufLen <= 0)
+//            bufLen = Integer.MAX_VALUE;
+//        StringBuilder buf = new StringBuilder(bufLen);
+//        deepToString(a, buf, new HashSet());
+//        return buf.toString();
+//    }
 
     private static void deepToString(Object[] a, StringBuilder buf,
                                      Set<Object[]> dejaVu) {

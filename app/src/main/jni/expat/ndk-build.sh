@@ -1,4 +1,4 @@
 #!/bin/sh
 # 
 export NDK_PROJECT_PATH=.
-/cygdrive/u/Programs/android-ndk/ndk-build
+/home/santa/Android/Sdk/ndk-bundle/ndk-build

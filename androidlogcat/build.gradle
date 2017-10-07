@@ -11,6 +11,9 @@ android {
         versionName "1.0"
         vectorDrawables.useSupportLibrary = true
     }
+    task ndkBuild(type: Exec) {
+        commandLine 'ndk-build', '-C', file('src/main').absolutePath
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -20,6 +23,11 @@ android {
     dataBinding.enabled = true
 }
 
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+    }
+}
 
 dependencies {
     compile "com.android.support:appcompat-v7:$supportLibVersion"
@@ -27,6 +35,7 @@ dependencies {
     compile "com.android.support:support-annotations:$supportLibVersion"
     compile "com.android.support:design:$supportLibVersion"
     compile "com.android.support:support-v13:$supportLibVersion"
-    compile 'com.afollestad.material-dialogs:commons:0.9.4.6'
+    compile 'com.afollestad.material-dialogs:core:0.9.4.7'
+    compile 'com.afollestad.material-dialogs:commons:0.9.4.7'
     compile 'me.zhanghai.android.materialprogressbar:library:1.1.4'
 }
