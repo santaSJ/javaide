@@ -20,13 +20,8 @@ public interface Builder {
 
     void runProject();
 
-    void buildJar();
-
-    void buildApk();
-
     void runFile(String path);
 
     void previewLayout(String path);
 
-    void createKeyStore();
 }

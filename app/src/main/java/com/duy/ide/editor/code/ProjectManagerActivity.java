@@ -98,7 +98,7 @@ import static com.duy.project.fragments.FolderStructureFragment.newInstance;
  * Created by Duy on 09-Mar-17.
  */
 public abstract class ProjectManagerActivity extends AbstractAppCompatActivity
-        implements SymbolListView.OnKeyListener, EditorControl,
+        implements SymbolListView.OnKeyListener,
         FileActionListener,
         DialogNewJavaProject.OnCreateProjectListener, DialogNewClass.OnCreateFileListener,
         DialogSelectType.OnFileTypeSelectListener, FileSelectListener {
@@ -340,49 +340,6 @@ public abstract class ProjectManagerActivity extends AbstractAppCompatActivity
         return null;
     }
 
-    @Override
-    public void saveAs() {
-        saveCurrentFile();
-        final AppCompatEditText edittext = new AppCompatEditText(this);
-        edittext.setHint(R.string.enter_new_file_name);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.save_as)
-                .setView(edittext)
-                .setIcon(R.drawable.ic_create_new_folder_white_24dp)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        String fileName = edittext.getText().toString();
-                        dialog.cancel();
-                        File currentFile = getCurrentFile();
-                        if (currentFile != null) {
-                            try {
-                                mFileManager.copy(currentFile.getPath(),
-                                        currentFile.getParent() + "/" + fileName);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                Toast.makeText(ProjectManagerActivity.this, R.string.can_not_save_file,
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    }
-                })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
-        builder.create().show();
-    }
-
-    @Override
-    public void saveAllFile() {
-        for (int i = 0; i < mPageAdapter.getCount(); i++) {
-            EditorFragment fm = mPageAdapter.getExistingFragment(i);
-            if (fm != null) {
-                fm.saveFile();
-            }
-        }
-    }
 
     @Override
     protected void onDestroy() {
@@ -452,8 +409,6 @@ public abstract class ProjectManagerActivity extends AbstractAppCompatActivity
             addNewPageEditor(new File(mainClass.getPath(projectFile)), true);
         }
     }
-
-    protected abstract void startAutoCompleteService();
 
     @Override
     public void onFileCreated(File classF) {
@@ -556,10 +511,6 @@ public abstract class ProjectManagerActivity extends AbstractAppCompatActivity
         dialogNewProject.show(getSupportFragmentManager(), DialogNewJavaProject.TAG);
     }
 
-    public void showDialogCreateAndroidProject() {
-        DialogNewAndroidProject dialogNewProject = DialogNewAndroidProject.newInstance();
-        dialogNewProject.show(getSupportFragmentManager(), DialogNewAndroidProject.TAG);
-    }
 
     public void showDialogSelectFileType(@Nullable File parent) {
         DialogSelectType dialogSelectType = DialogSelectType.newInstance(parent);

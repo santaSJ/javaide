@@ -124,7 +124,7 @@ public class ActivitySplashScreen extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                Intent intent = new Intent(ActivitySplashScreen.this, DeferActivity.class);
+                Intent intent = new Intent(ActivitySplashScreen.this, MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                 overridePendingTransition(0, 0);
                 startActivity(intent);

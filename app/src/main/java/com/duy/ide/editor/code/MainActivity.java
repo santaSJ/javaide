@@ -53,7 +53,6 @@ import com.duy.compile.CompileJavaTask;
 import com.duy.compile.CompileManager;
 import com.duy.compile.diagnostic.DiagnosticFragment;
 import com.duy.ide.Builder;
-import com.duy.ide.MenuEditor;
 import com.duy.ide.R;
 import com.duy.ide.autocomplete.AutoCompleteProvider;
 import com.duy.ide.autocomplete.model.Description;
@@ -61,7 +60,6 @@ import com.duy.ide.autocomplete.util.JavaUtil;
 import com.duy.ide.code_sample.activities.DocumentActivity;
 import com.duy.ide.code_sample.activities.SampleActivity;
 import com.duy.ide.editor.code.view.EditorView;
-import com.duy.ide.editor.code.view.IndentEditText;
 import com.duy.ide.editor.uidesigner.inflate.DialogLayoutPreview;
 import com.duy.ide.file.FileManager;
 import com.duy.ide.setting.AppSetting;
@@ -94,10 +92,6 @@ public class MainActivity extends ProjectManagerActivity implements
     private static final String TAG = "MainActivity";
 
     private CompileManager mCompileManager;
-    private MenuEditor mMenuEditor;
-    private Dialog mDialog;
-    private MenuItem mActionRun;
-    private ProgressBar mCompileProgress;
     private AutoCompleteProvider mAutoCompleteProvider;
 
     private static final String PACKAGE_NAME = "org.delta.distributed";
@@ -111,7 +105,7 @@ public class MainActivity extends ProjectManagerActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mCompileManager = new CompileManager(this);
-        mMenuEditor = new MenuEditor(this, this);
+//        mMenuEditor = new MenuEditor(this, this);
 
         Intent intent = getIntent();
         code = intent.getStringExtra("code");
@@ -119,7 +113,7 @@ public class MainActivity extends ProjectManagerActivity implements
 //
 //        startAutoCompleteService();
 //
-//        String code = "package "+ PACKAGE_NAME +";\npublic class Main { public static void main(String[] args) {System.out.println(\"Hello World!!\");}}";
+        code = "package "+ PACKAGE_NAME +";\npublic class Main { public static void main(String[] args) {System.out.println(\"Hello World!!\");}}";
 //
 //        doCreateProject();
         compileAndExecuteCode(code);
@@ -143,57 +137,17 @@ public class MainActivity extends ProjectManagerActivity implements
         }
     }
 
-    protected void startAutoCompleteService() {
-        Log.d(TAG, "startAutoCompleteService() called");
-        if (mAutoCompleteProvider == null) {
-            if (mProjectFile != null) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mAutoCompleteProvider = new AutoCompleteProvider(MainActivity.this);
-                        mAutoCompleteProvider.load(mProjectFile);
-                        populateAutoCompleteService(mAutoCompleteProvider);
-                    }
-                }).start();
-            }
-        }
-    }
 
 
-    public void initView(Bundle savedInstanceState) {
-        mDrawerLayout.addDrawerListener(this);
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                mDrawerLayout.closeDrawers();
-                return mMenuEditor.onOptionsItemSelected(item);
-            }
-        });
-        View tab = findViewById(R.id.img_tab);
-        if (tab != null) {
-            tab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    insertTab(v);
-                }
-            });
-        }
-        mCompileProgress = findViewById(R.id.compile_progress);
-    }
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        return mMenuEditor.onOptionsItemSelected(item);
+//    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return mMenuEditor.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void invalidateOptionsMenu() {
-        super.invalidateOptionsMenu();
-    }
-
-    void insertTab(View v) {
-        onKeyClick(v, IndentEditText.TAB_CHARACTER);
-    }
+//    @Override
+//    public void invalidateOptionsMenu() {
+//        super.invalidateOptionsMenu();
+//    }
 
     @Override
     public void onKeyClick(View view, String text) {
@@ -211,128 +165,19 @@ public class MainActivity extends ProjectManagerActivity implements
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        boolean r = mMenuEditor.onCreateOptionsMenu(menu);
-        mActionRun = menu.findItem(R.id.action_edit_run);
-        return r;
-    }
-
     /**
      * create dialog find and replace
      */
     @Override
-    public void findAndReplace() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setView(R.layout.dialog_find_and_replace);
-        final AlertDialog alertDialog = builder.create();
-        alertDialog.show();
-
-        final CheckBox ckbRegex = alertDialog.findViewById(R.id.ckb_regex);
-        final CheckBox ckbMatch = alertDialog.findViewById(R.id.ckb_match_key);
-        final EditText editFind = alertDialog.findViewById(R.id.txt_find);
-        final EditText editReplace = alertDialog.findViewById(R.id.edit_replace);
-        if (editFind != null) {
-            editFind.setText(getPreferences().getString(AppSetting.LAST_FIND));
-        }
-        View find = alertDialog.findViewById(R.id.btn_replace);
-        assert find != null;
-        assert editFind != null;
-        assert editReplace != null;
-        assert ckbRegex != null;
-        assert ckbMatch != null;
-        find.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EditorFragment editorFragment = mPageAdapter.getCurrentFragment();
-                if (editorFragment != null) {
-
-                    editorFragment.doFindAndReplace(
-                            editFind.getText().toString(),
-                            editReplace.getText().toString(),
-                            ckbRegex.isChecked(),
-                            ckbMatch.isChecked());
-                }
-                getPreferences().put(AppSetting.LAST_FIND, editFind.getText().toString());
-                alertDialog.dismiss();
-            }
-        });
-        View cancle = alertDialog.findViewById(R.id.btn_cancel);
-        assert cancle != null;
-        cancle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                alertDialog.dismiss();
-            }
-        });
-    }
-
-    @Override
     public void runProject() {
-        saveAllFile();
+//        saveAllFile();
         if (mProjectFile != null) {
-            if (mProjectFile instanceof AndroidProjectFolder) {
-                compileAndroidProject();
-            } else {
-                compileJavaProject();
-            }
+            compileJavaProject();
         } else {
             Toast.makeText(this, "You need create project", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void compileAndroidProject() {
-        if (mProjectFile instanceof AndroidProjectFolder) {
-            if (!((AndroidProjectFolder) mProjectFile).getXmlManifest().exists()) {
-                Toast.makeText(this, "Can not find AndroidManifest.xml", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            //check launcher activity
-            if (((AndroidProjectFolder) mProjectFile).getLauncherActivity() == null) {
-                String msg = getString(R.string.can_not_find_launcher_activity);
-                Snackbar.make(findViewById(R.id.coordinate_layout), msg, Snackbar.LENGTH_LONG)
-                        .setAction(R.string.config, new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                            }
-                        }).show();
-                return;
-            }
-            ((AndroidProjectFolder) mProjectFile).checkKeyStoreExits(this);
-            new BuildApkTask(new BuildApkTask.CompileListener() {
-                @Override
-                public void onStart() {
-                    updateUiStartCompile();
-                }
-
-                @Override
-                public void onError(Exception e, List<Diagnostic> diagnostics) {
-                    Toast.makeText(MainActivity.this, R.string.failed_msg, Toast.LENGTH_SHORT).show();
-                    openDrawer(GravityCompat.START);
-                    mDiagnosticPresenter.display(diagnostics);
-                    updateUIFinish();
-                }
-
-                @Override
-                public void onComplete(File apk, List<Diagnostic> diagnostics) {
-                    updateUIFinish();
-                    Toast.makeText(MainActivity.this, R.string.build_success + " " + apk.getPath(), Toast.LENGTH_SHORT).show();
-                    mFilePresenter.refresh(mProjectFile);
-                    mDiagnosticPresenter.display(diagnostics);
-                    mContainerOutput.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-                    Toast.makeText(MainActivity.this, "Installing apk", Toast.LENGTH_SHORT).show();
-                    RootUtils.installApk(MainActivity.this, apk);
-                }
-
-            }).execute((AndroidProjectFolder) mProjectFile);
-        } else {
-            if (mProjectFile != null) {
-                complain("This is Java project, please create new Android project");
-            } else {
-                complain("You need create project");
-            }
-        }
-    }
 
 
     public String compileAndExecuteCode(String sourceCode) {
@@ -378,24 +223,17 @@ public class MainActivity extends ProjectManagerActivity implements
         CompileJavaTask.CompileListener compileListener = new CompileJavaTask.CompileListener() {
             @Override
             public void onStart() {
-                updateUiStartCompile();
             }
 
             @Override
             public void onError(Exception e, ArrayList<Diagnostic> diagnostics) {
                 Toast.makeText(MainActivity.this, R.string.failed_msg, Toast.LENGTH_SHORT).show();
-                openDrawer(GravityCompat.START);
-                mBottomPage.setCurrentItem(DiagnosticFragment.INDEX);
-                mDiagnosticPresenter.display(diagnostics);
-                updateUIFinish();
             }
 
             @Override
             public void onComplete(final JavaProjectFolder projectFile,
                                    final List<Diagnostic> diagnostics) {
-                updateUIFinish();
                 Toast.makeText(MainActivity.this, R.string.compile_success, Toast.LENGTH_SHORT).show();
-                mDiagnosticPresenter.display(diagnostics);
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -421,96 +259,10 @@ public class MainActivity extends ProjectManagerActivity implements
         new CompileJavaTask(compileListener).execute(mProjectFile);
     }
 
-    @Override
-    public void buildJar() {
-        saveAllFile();
-        if (mProjectFile != null) {
-            new BuildJarAchieveTask(new BuildJarAchieveTask.CompileListener() {
-                @Override
-                public void onStart() {
-                    updateUiStartCompile();
-                }
-
-                @Override
-                public void onError(Exception e, List<Diagnostic> diagnostics) {
-                    Toast.makeText(MainActivity.this, R.string.failed_msg, Toast.LENGTH_SHORT).show();
-                    openDrawer(GravityCompat.START);
-                    mBottomPage.setCurrentItem(DiagnosticFragment.INDEX);
-                    mDiagnosticPresenter.display(diagnostics);
-                    mContainerOutput.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
-                    updateUIFinish();
-                }
-
-                @Override
-                public void onComplete(File jarfile, List<Diagnostic> diagnostics) {
-                    Toast.makeText(MainActivity.this, R.string.build_success + " " + jarfile.getPath(),
-                            Toast.LENGTH_SHORT).show();
-                    mFilePresenter.refresh(mProjectFile);
-                    mDiagnosticPresenter.display(diagnostics);
-                    mContainerOutput.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-                    updateUIFinish();
-                }
-
-            }).execute(mProjectFile);
-        } else {
-            complain("You need create project");
-        }
-    }
-
-    public void buildApk() {
-        compileAndroidProject();
-    }
 
     /**
      * replace dialog find
      */
-    public void showDialogFind() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setView(R.layout.dialog_find);
-        final AlertDialog alertDialog = builder.create();
-        alertDialog.show();
-        final CheckBox ckbRegex = alertDialog.findViewById(R.id.ckb_regex);
-        final CheckBox ckbMatch = alertDialog.findViewById(R.id.ckb_match_key);
-        final CheckBox ckbWordOnly = alertDialog.findViewById(R.id.ckb_word_only);
-        final EditText editFind = alertDialog.findViewById(R.id.txt_find);
-        editFind.setText(getPreferences().getString(AppSetting.LAST_FIND));
-        alertDialog.findViewById(R.id.btn_replace).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EditorFragment editorFragment = mPageAdapter.getCurrentFragment();
-                if (editorFragment != null) {
-                    editorFragment.doFind(editFind.getText().toString(),
-                            ckbRegex.isChecked(),
-                            ckbWordOnly.isChecked(),
-                            ckbMatch.isChecked());
-                }
-                getPreferences().put(AppSetting.LAST_FIND, editFind.getText().toString());
-                alertDialog.dismiss();
-            }
-        });
-        alertDialog.findViewById(R.id.btn_cancel).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                alertDialog.dismiss();
-            }
-        });
-
-
-    }
-
-    @Override
-    public void saveCurrentFile() {
-        EditorFragment editorFragment = mPageAdapter.getCurrentFragment();
-        if (editorFragment != null) {
-            editorFragment.saveFile();
-        }
-    }
-
-    @Override
-    public void showDocumentActivity() {
-        Intent intent = new Intent(this, DocumentActivity.class);
-        startActivity(intent);
-    }
 
     public String getCode() {
         EditorFragment editorFragment = mPageAdapter.getCurrentFragment();
@@ -520,13 +272,6 @@ public class MainActivity extends ProjectManagerActivity implements
         return "";
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (mDialog != null && mDialog.isShowing()) {
-            mDialog.dismiss();
-        }
-    }
 
     @Override
     protected void onResume() {
@@ -580,77 +325,9 @@ public class MainActivity extends ProjectManagerActivity implements
     /**
      * show dialog create new source file
      */
-    @Override
-    public void createNewFile(View view) {
-//        DialogCreateNewFile dialogCreateNewFile = DialogCreateNewFile.Companion.getInstance();
-//        dialogCreateNewFile.show(getSupportFragmentManager(), DialogCreateNewFile.Companion.getTAG());
-//        dialogCreateNewFile.setListener(new DialogCreateNewFile.OnCreateNewFileListener() {
-//            @Override
-//            public void onFileCreated(@NonNull File file) {
-//                saveFile();
-//                //add to view
-//                addNewPageEditor(file, SELECT);
-//                mDrawerLayout.closeDrawers();
-//            }
-//
-//            @Override
-//            public void onCancel() {
-//            }
-//        });
-    }
 
-    @Override
-    public void goToLine() {
-        final AppCompatEditText edittext = new AppCompatEditText(this);
-        edittext.setInputType(InputType.TYPE_CLASS_NUMBER);
-        edittext.setMaxEms(5);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.goto_line)
-                .setView(edittext)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        String line = edittext.getText().toString();
-                        if (!line.isEmpty()) {
-                            EditorFragment editorFragment
-                                    = mPageAdapter.getCurrentFragment();
-                            if (editorFragment != null) {
-                                editorFragment.goToLine(Integer.parseInt(line));
-                            }
-                        }
-                        dialog.cancel();
-                    }
-                })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
-        builder.create().show();
-    }
 
-    @Override
-    public void formatCode() {
-        EditorFragment editorFragment = mPageAdapter.getCurrentFragment();
-        if (editorFragment != null) {
-            editorFragment.formatCode();
-        }
-    }
 
-    @Override
-    public void undo() {
-        EditorFragment editorFragment = mPageAdapter.getCurrentFragment();
-        if (editorFragment != null) {
-            editorFragment.undo();
-        }
-    }
-
-    @Override
-    public void redo() {
-        EditorFragment editorFragment = mPageAdapter.getCurrentFragment();
-        if (editorFragment != null) {
-            editorFragment.redo();
-        }
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -696,30 +373,11 @@ public class MainActivity extends ProjectManagerActivity implements
 
     }
 
-    @Override
-    public void paste() {
-        EditorFragment editorFragment = mPageAdapter.getCurrentFragment();
-        if (editorFragment != null) {
-            editorFragment.paste();
-        }
-    }
 
-    @Override
-    public void copyAll() {
-        EditorFragment editorFragment = mPageAdapter.getCurrentFragment();
-        if (editorFragment != null) {
-            editorFragment.copyAll();
-        }
-    }
-
-    @Override
-    public void selectThemeFont() {
-        startActivity(new Intent(this, ThemeFontActivity.class));
-    }
 
     @Override
     public void runFile(String filePath) {
-        saveCurrentFile();
+//        saveCurrentFile();
         if (mProjectFile == null) return;
         boolean canRun = ClassUtil.hasMainFunction(new File(filePath));
         if (!canRun) {
@@ -737,7 +395,7 @@ public class MainActivity extends ProjectManagerActivity implements
 
     @Override
     public void previewLayout(String path) {
-        saveCurrentFile();
+//        saveCurrentFile();
         File currentFile = getCurrentFile();
         if (currentFile != null) {
             DialogLayoutPreview dialogPreview = DialogLayoutPreview.newInstance(currentFile);
@@ -745,13 +403,6 @@ public class MainActivity extends ProjectManagerActivity implements
         } else {
             Toast.makeText(this, "Can not find file", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    @Override
-    public void createKeyStore() {
-        // TODO: 22-Aug-17 support this feature
-//        Intent intent = new Intent(this, CreateKeyStoreActivity.class);
-//        intent.putExtra("project_path", mProjectFile.getProjectDir());
     }
 
     @Override
@@ -824,8 +475,6 @@ public class MainActivity extends ProjectManagerActivity implements
     }
 
     private void updateUiStartCompile() {
-        if (mActionRun != null) mActionRun.setEnabled(false);
-        if (mCompileProgress != null) mCompileProgress.setVisibility(View.VISIBLE);
         hideKeyboard();
         openDrawer(GravityCompat.START);
 
@@ -842,16 +491,6 @@ public class MainActivity extends ProjectManagerActivity implements
 
     private void updateUIFinish() {
         mMessagePresenter.pause((JavaApplication) getApplication());
-
-        if (mActionRun != null) mActionRun.setEnabled(true);
-        if (mCompileProgress != null) {
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mCompileProgress.setVisibility(View.GONE);
-                }
-            }, 500);
-        }
     }
 
 

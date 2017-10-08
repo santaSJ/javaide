@@ -18,20 +18,27 @@ package com.duy.compile;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.widget.Toast;
 
+import com.duy.JavaApplication;
 import com.duy.compile.external.CompileHelper;
 import com.duy.ide.debug.activities.DebugActivity;
 import com.duy.ide.editor.code.MainActivity;
 import com.duy.project.file.java.JavaProjectFolder;
 import com.duy.run.activities.ExecuteActivity;
+import com.duy.run.view.ConsoleEditText;
 
 import java.io.File;
+import java.io.InputStream;
+
+import static android.content.Context.MODE_PRIVATE;
+import static com.duy.compile.external.CompileHelper.Action.RUN_DEX;
 
 /**
  * Created by Duy on 11-Feb-17.
  */
 
-public class CompileManager {
+public class CompileManager implements ConsoleEditText.StdOutListener {
 
     public static final String FILE_PATH = "file_name";     // extras indicators
     public static final String IS_NEW = "is_new";
@@ -46,12 +53,21 @@ public class CompileManager {
 
     public static final int RESULT_DISTRIBUTED = 1010;
 
+    private ConsoleEditText mConsoleEditText;
     private final Activity mActivity;
 
     public CompileManager(Activity activity) {
         this.mActivity = activity;
+        mConsoleEditText = new ConsoleEditText(mActivity);
+        mConsoleEditText.init(mActivity, this);
+        initInOut();
     }
 
+    private void initInOut() {
+        JavaApplication application = (JavaApplication) mActivity.getApplication();
+        application.addStdErr(mConsoleEditText.getErrorStream());
+        application.addStdOut(mConsoleEditText.getOutputStream());
+    }
 
 
     public void debug(String name) {
@@ -69,16 +85,60 @@ public class CompileManager {
     }
 
 
-    public void executeDex(JavaProjectFolder projectFile, File dex) {
-        Intent intent = new Intent(mActivity, ExecuteActivity.class);
-        intent.putExtra(ACTION, CompileHelper.Action.RUN_DEX);
-        intent.putExtra(PROJECT_FILE, projectFile);
-        intent.putExtra(DEX_FILE, dex);
-        mActivity.startActivityForResult(intent, RESULT_DISTRIBUTED);
+    public void executeDex(final JavaProjectFolder projectFile, final File dex) {
+//        Intent intent = new Intent(mActivity, ExecuteActivity.class);
+//        intent.putExtra(ACTION, CompileHelper.Action.RUN_DEX);
+//        intent.putExtra(PROJECT_FILE, projectFile);
+//        intent.putExtra(DEX_FILE, dex);
+//        mActivity.startActivityForResult(intent, RESULT_DISTRIBUTED);
+        Thread runThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    runProgram(projectFile, RUN_DEX, dex);
+                } catch (Error error) {
+                    error.printStackTrace(mConsoleEditText.getErrorStream());
+                } catch (Exception e) {
+                    e.printStackTrace(mConsoleEditText.getErrorStream());
+                } catch (Throwable e) {
+                    e.printStackTrace(mConsoleEditText.getErrorStream());
+                }
+            }
+        });
+        runThread.start();
+///*        try {
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }*/
+    }
+
+    private void runProgram(JavaProjectFolder projectFile, int action, File dex) throws Exception {
+        InputStream in = mConsoleEditText.getInputStream();
+
+        File tempDir = mActivity.getDir("dex", MODE_PRIVATE);
+        switch (action) {
+            case CompileHelper.Action.RUN: {
+                CompileHelper.compileAndRun(in, tempDir, projectFile);
+            }
+            break;
+            case CompileHelper.Action.RUN_DEX: {
+                if (dex != null) {
+                    String mainClass = projectFile.getMainClass().getName();
+                    CompileHelper.executeDex(in, dex, tempDir, mainClass);
+                }
+                break;
+            }
+        }
     }
 
     public void buildApk() {
 
+    }
+
+    @Override
+    public void onResultGet(String result) {
+        Toast.makeText(mActivity, result, Toast.LENGTH_SHORT).show();
     }
 
     public interface ProcessCallback {
