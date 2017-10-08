@@ -60,12 +60,11 @@ public class CompileManager implements ConsoleEditText.StdOutListener {
         this.mActivity = activity;
         mConsoleEditText = new ConsoleEditText(mActivity);
         mConsoleEditText.init(mActivity, this);
-        initInOut();
     }
 
     private void initInOut() {
         JavaApplication application = (JavaApplication) mActivity.getApplication();
-        application.addStdErr(mConsoleEditText.getErrorStream());
+//        application.addStdErr(mConsoleEditText.getErrorStream());
         application.addStdOut(mConsoleEditText.getOutputStream());
     }
 
@@ -97,11 +96,11 @@ public class CompileManager implements ConsoleEditText.StdOutListener {
                 try {
                     runProgram(projectFile, RUN_DEX, dex);
                 } catch (Error error) {
-                    error.printStackTrace(mConsoleEditText.getErrorStream());
+                    error.printStackTrace();
                 } catch (Exception e) {
-                    e.printStackTrace(mConsoleEditText.getErrorStream());
+                    e.printStackTrace();
                 } catch (Throwable e) {
-                    e.printStackTrace(mConsoleEditText.getErrorStream());
+                    e.printStackTrace();
                 }
             }
         });
@@ -114,6 +113,7 @@ public class CompileManager implements ConsoleEditText.StdOutListener {
     }
 
     private void runProgram(JavaProjectFolder projectFile, int action, File dex) throws Exception {
+        initInOut();
         InputStream in = mConsoleEditText.getInputStream();
 
         File tempDir = mActivity.getDir("dex", MODE_PRIVATE);
