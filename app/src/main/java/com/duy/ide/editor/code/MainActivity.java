@@ -17,12 +17,15 @@
 package com.duy.ide.editor.code;
 
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -53,6 +56,7 @@ import com.duy.compile.CompileJavaTask;
 import com.duy.compile.CompileManager;
 import com.duy.compile.diagnostic.DiagnosticFragment;
 import com.duy.ide.Builder;
+import com.duy.ide.DistributedService;
 import com.duy.ide.R;
 import com.duy.ide.autocomplete.AutoCompleteProvider;
 import com.duy.ide.autocomplete.model.Description;
@@ -86,7 +90,7 @@ import static com.duy.run.activities.ExecuteActivity.KEY_RESULT;
 public class MainActivity extends ProjectManagerActivity implements
         DrawerLayout.DrawerListener,
         DialogRunConfig.OnConfigChangeListener,
-        Builder {
+        Builder, ServiceConnection {
     public static final int REQUEST_CODE_SAMPLE = 1015;
 
     private static final String TAG = "MainActivity";
@@ -97,6 +101,8 @@ public class MainActivity extends ProjectManagerActivity implements
     private static final String PACKAGE_NAME = "org.delta.distributed";
     private String code;
 
+    private DistributedService service;
+
     private void populateAutoCompleteService(AutoCompleteProvider provider) {
         mPagePresenter.setAutoCompleteProvider(provider);
     }
@@ -104,20 +110,21 @@ public class MainActivity extends ProjectManagerActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mCompileManager = new CompileManager(this);
-//        mMenuEditor = new MenuEditor(this, this);
-
-        Intent intent = getIntent();
-        code = intent.getStringExtra("code");
-//        initView(savedInstanceState);
+//        mCompileManager = new CompileManager(this);
+////        mMenuEditor = new MenuEditor(this, this);
 //
-//        startAutoCompleteService();
-//
-        code = "package "+ PACKAGE_NAME +";\npublic class Main { public static void main(String[] args) {System.out.println(\"Hello World!!\");}}";
-//
-//        doCreateProject();
-        compileAndExecuteCode(code);
+//        Intent intent = getIntent();
+//        code = intent.getStringExtra("code");
+////        initView(savedInstanceState);
+////
+////        startAutoCompleteService();
+////
+////        code = "package "+ PACKAGE_NAME +";\npublic class Main { public static void main(String[] args) {System.out.println(\"Hello World!!\");}}";
+////
+////        doCreateProject();
+//        compileAndExecuteCode(code);
     }
+
 
     private void doCreateProject() {
         if (true) {
@@ -276,18 +283,15 @@ public class MainActivity extends ProjectManagerActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        if (getPreferences().isShowListSymbol()) {
-            if (mContainerSymbol != null && mKeyList != null) {
-                mKeyList.setListener(this);
-                mContainerSymbol.setVisibility(View.VISIBLE);
-            }
-        } else {
-            if (mContainerSymbol != null) {
-                mContainerSymbol.setVisibility(View.GONE);
-            }
-        }
+        Intent intent = new Intent(this, DistributedService.class);
+        bindService(intent, this, BIND_AUTO_CREATE);
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unbindService(this);
+    }
 
     @Override
     public void onSharedPreferenceChanged(@NonNull SharedPreferences sharedPreferences, @NonNull String s) {
@@ -466,32 +470,16 @@ public class MainActivity extends ProjectManagerActivity implements
     }
 
 
-    private void hideKeyboard() {
-        View view = this.getCurrentFocus();
-        if (view != null) {
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        }
-    }
 
-    private void updateUiStartCompile() {
-        hideKeyboard();
-        openDrawer(GravityCompat.START);
-
-        mMessagePresenter.resume((JavaApplication) getApplication());
-        mMessagePresenter.clear();
-        mMessagePresenter.append("Compiling...\n");
-
-        mContainerOutput.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
-        mDiagnosticPresenter.clear();
-
-        mBottomPage.setCurrentItem(0);
+    @Override
+    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+        DistributedService.LocalBinder binder = (DistributedService.LocalBinder) iBinder;
+        service = binder.getService();
 
     }
 
-    private void updateUIFinish() {
-        mMessagePresenter.pause((JavaApplication) getApplication());
+    @Override
+    public void onServiceDisconnected(ComponentName componentName) {
+        service = null;
     }
-
-
 }

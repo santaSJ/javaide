@@ -17,6 +17,8 @@
 package com.duy.compile;
 
 import android.app.Activity;
+import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
 
@@ -25,7 +27,6 @@ import com.duy.compile.external.CompileHelper;
 import com.duy.ide.debug.activities.DebugActivity;
 import com.duy.ide.editor.code.MainActivity;
 import com.duy.project.file.java.JavaProjectFolder;
-import com.duy.run.activities.ExecuteActivity;
 import com.duy.run.view.ConsoleEditText;
 
 import java.io.File;
@@ -52,44 +53,33 @@ public class CompileManager implements ConsoleEditText.StdOutListener {
     public static final String DEX_FILE = "dex_path";
 
     public static final int RESULT_DISTRIBUTED = 1010;
+    private final Application application;
+    private final PublishProgressToServer listener;
 
     private ConsoleEditText mConsoleEditText;
-    private final Activity mActivity;
+    private final Context context;
 
-    public CompileManager(Activity activity) {
-        this.mActivity = activity;
-        mConsoleEditText = new ConsoleEditText(mActivity);
-        mConsoleEditText.init(mActivity, this);
+    public CompileManager(Context activity, Application application, PublishProgressToServer listener) {
+        this.context = activity;
+        this.application = application;
+        this.listener = listener;
+        mConsoleEditText = new ConsoleEditText(context);
+        mConsoleEditText.init(context, this);
     }
 
     private void initInOut() {
-        JavaApplication application = (JavaApplication) mActivity.getApplication();
+        JavaApplication app = (JavaApplication) application;
 //        application.addStdErr(mConsoleEditText.getErrorStream());
-        application.addStdOut(mConsoleEditText.getOutputStream());
-    }
-
-
-    public void debug(String name) {
-        Intent intent = new Intent(mActivity, DebugActivity.class);
-        intent.putExtra(FILE_PATH, name);
-        mActivity.startActivity(intent);
-    }
-
-    public void edit(String fileName, Boolean isNew) {
-        Intent intent = new Intent(mActivity, MainActivity.class);
-        intent.putExtra(FILE_PATH, fileName);
-        intent.putExtra(IS_NEW, isNew);
-        intent.putExtra(INITIAL_POS, 0);
-        mActivity.startActivityForResult(intent, ACTIVITY_EDITOR);
+        app.addStdOut(mConsoleEditText.getOutputStream());
     }
 
 
     public void executeDex(final JavaProjectFolder projectFile, final File dex) {
-//        Intent intent = new Intent(mActivity, ExecuteActivity.class);
+//        Intent intent = new Intent(context, ExecuteActivity.class);
 //        intent.putExtra(ACTION, CompileHelper.Action.RUN_DEX);
 //        intent.putExtra(PROJECT_FILE, projectFile);
 //        intent.putExtra(DEX_FILE, dex);
-//        mActivity.startActivityForResult(intent, RESULT_DISTRIBUTED);
+//        context.startActivityForResult(intent, RESULT_DISTRIBUTED);
         Thread runThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -116,7 +106,7 @@ public class CompileManager implements ConsoleEditText.StdOutListener {
         initInOut();
         InputStream in = mConsoleEditText.getInputStream();
 
-        File tempDir = mActivity.getDir("dex", MODE_PRIVATE);
+        File tempDir = context.getDir("dex", MODE_PRIVATE);
         switch (action) {
             case CompileHelper.Action.RUN: {
                 CompileHelper.compileAndRun(in, tempDir, projectFile);
@@ -138,10 +128,12 @@ public class CompileManager implements ConsoleEditText.StdOutListener {
 
     @Override
     public void onResultGet(String result) {
-        Toast.makeText(mActivity, result, Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, result, Toast.LENGTH_SHORT).show();
+        listener.onFinish(result);
     }
 
-    public interface ProcessCallback {
-        void onFailed(String s);
+
+    public interface PublishProgressToServer {
+        void onFinish(String result);
     }
 }

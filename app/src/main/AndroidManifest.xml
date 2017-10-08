@@ -67,6 +67,7 @@
 
         <activity android:name=".activities.DeferActivity">
         </activity>
+        <service android:name=".DistributedService"/>
     </application>
 
 </manifest>
